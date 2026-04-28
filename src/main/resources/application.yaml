@@ -24,5 +24,5 @@ management:
 
 app:
   jwt:
-    secret: iambatman!iamvengeance!
+    secret: aWFtYmF0bWFuaWFtdmVuZ2VhbmNlYW1iYXRtYW5pc2VjcmV0a2V5Zm9yand0
     expiration-ms: 3600000

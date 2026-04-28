@@ -1,4 +1,8 @@
 package com.naveen.slaticket.user.entity;
 
-public class Role {
+public enum Role {
+    ROLE_USER,
+    ROLE_ADMIN,
+    ROLE_MANAGER,
+    ROLE_AGENT
 }

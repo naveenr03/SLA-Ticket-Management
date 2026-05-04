@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Page<Ticket> findByCreatedBy(User createdBy, Pageable pageable);
+    Page<Ticket> findByAssignedTo(User assignedTo, Pageable pageable);
 }

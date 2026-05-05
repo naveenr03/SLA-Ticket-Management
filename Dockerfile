@@ -13,6 +13,8 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN addgroup -g 1001 app && adduser -u 1001 -G app -s /bin/sh -D app
 COPY --from=build /app/target/app.jar app.jar
+# Non-root user must be able to create ticket attachment storage (see FileStorageService)
+RUN mkdir -p /app/uploads/tickets && chown -R app:app /app
 USER app
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080

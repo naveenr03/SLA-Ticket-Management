@@ -1,0 +1,26 @@
+# Production / cloud (Render, Railway, etc.). Activate with SPRING_PROFILES_ACTIVE=prod
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    # Base64-encoded secret; decoded bytes must be sufficient for HS256 (e.g. 32+ bytes).
+    secret: ${APP_JWT_SECRET}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:3600000}

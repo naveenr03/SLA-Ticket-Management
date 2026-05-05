@@ -1,0 +1,24 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec)
+# Create a PostgreSQL instance in the Render dashboard, then set the env vars below on this web service.
+# Swagger UI: https://<your-service>.onrender.com/swagger-ui.html
+
+services:
+  - type: web
+    name: slaticket-api
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        sync: false

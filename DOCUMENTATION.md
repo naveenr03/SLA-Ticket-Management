@@ -408,6 +408,70 @@ The API will be available at `http://localhost:8080`.
 
 ---
 
+## CI, Docker, and public demo (Render)
+
+### GitHub Actions
+
+Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on pushes and pull requests to `main`:
+
+- Temurin JDK 21, Maven cache
+- `./mvnw -B verify` (compiles and runs `SlaticketApplicationTests` against PostgreSQL via **Testcontainers** when Docker is available, e.g. on GitHub-hosted runners)
+- On a machine **without Docker**, the smoke test is **skipped** (`@Testcontainers(disabledWithoutDocker = true)`), so `mvn verify` still succeeds locally
+
+Optional manual deploy: [`.github/workflows/deploy-render.yml`](.github/workflows/deploy-render.yml) POSTs to a Render **Deploy Hook** if you set repository secret `RENDER_DEPLOY_HOOK_URL`.
+
+### Production profile (`prod`)
+
+[`application-prod.yaml`](src/main/resources/application-prod.yaml) expects:
+
+| Variable | Purpose |
+|----------|---------|
+| `SPRING_DATASOURCE_URL` | JDBC URL, e.g. `jdbc:postgresql://HOST:5432/DBNAME` |
+| `SPRING_DATASOURCE_USERNAME` | DB user |
+| `SPRING_DATASOURCE_PASSWORD` | DB password |
+| `APP_JWT_SECRET` | **Base64** string that decodes to at least 32 bytes (same format as local `app.jwt.secret` in `application.yaml`) |
+| `APP_JWT_EXPIRATION_MS` | Optional; defaults to `3600000` |
+| `PORT` | Set automatically on Render; mapped to `server.port` |
+
+Generate a safe JWT secret (example):
+
+```bash
+openssl rand -base64 48
+```
+
+Paste the output as `APP_JWT_SECRET` in Render.
+
+### Docker image
+
+[`Dockerfile`](Dockerfile) builds a runnable JAR with `./mvnw package -DskipTests` (tests are expected to run in CI first), sets `SPRING_PROFILES_ACTIVE=prod`, and listens on `PORT`.
+
+### Deploy on Render (resume-friendly URL)
+
+1. Push this repository to GitHub.
+2. In [Render](https://render.com), create a **PostgreSQL** database (free tier is fine for a demo).
+3. Create a **Web Service** → connect the repo → **Docker** runtime, root directory same as `Dockerfile` (repo root if `Dockerfile` is at the root of the Git repo).
+4. Set environment variables on the web service (from the Postgres **Internal** connection values on Render):
+
+   - `SPRING_DATASOURCE_URL` = `jdbc:postgresql://<internal-host>:5432/<database>`
+   - `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` from the database panel  
+   - `APP_JWT_SECRET` = output of `openssl rand -base64 48`  
+   - `SPRING_PROFILES_ACTIVE` = `prod` (also set in `Dockerfile`; overriding in the dashboard is fine)
+
+5. **Health check** path: `/actuator/health` (already public in security config).
+6. After deploy, your Swagger UI link for a resume:
+
+   `https://<service-name>.onrender.com/swagger-ui.html`
+
+   (Cold starts on the free tier can take ~30–60 seconds.)
+
+Optional: add a **Deploy Hook** in Render and store it as `RENDER_DEPLOY_HOOK_URL`, then run the **Deploy (Render hook)** workflow after each release.
+
+Blueprint reference: [`render.yaml`](render.yaml) (you still need to enter DB credentials and `APP_JWT_SECRET` in the Render dashboard when `sync: false`).
+
+**Note:** Ticket attachments are stored on the container filesystem (`uploads/tickets`); files can be lost on redeploy. Suitable for API demos, not durable file storage.
+
+---
+
 ## What's Implemented vs. Placeholder
 
 | Feature | Status |

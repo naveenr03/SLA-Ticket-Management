@@ -1,0 +1,7 @@
+# Used with Testcontainers PostgreSQL (@ServiceConnection)
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC

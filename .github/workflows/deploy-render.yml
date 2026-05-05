@@ -1,0 +1,23 @@
+# After connecting this repo to Render (Docker deploy), add a Deploy Hook in the Render
+# dashboard (Service → Settings → Deploy Hook) and save it as repository secret:
+#   RENDER_DEPLOY_HOOK_URL
+#
+# Then run this workflow manually ("Run workflow") or extend `on:` to include push to main.
+name: Deploy (Render hook)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Add repository secret RENDER_DEPLOY_HOOK_URL (Render → Service → Deploy Hook)."
+            exit 1
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"

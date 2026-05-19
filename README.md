@@ -140,7 +140,3 @@ Pushes and pull requests to **`main`** run [`.github/workflows/ci.yml`](.github/
 If anything in the long-form doc disagrees with the live controllers, treat **Swagger UI** and the Java sources as the source of truth.
 
 ---
-
-## License
-
-See the `licenses` section in [`pom.xml`](pom.xml) if a license is recorded for this project.
